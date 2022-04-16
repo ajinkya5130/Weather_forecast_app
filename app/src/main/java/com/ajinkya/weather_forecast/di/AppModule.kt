@@ -10,6 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
@@ -17,7 +18,12 @@ class AppModule {
     @Provides
     @Singleton
     fun retrofitInstance(): WeatherAPI {
+        /* val interceptor = HttpLoggingInterceptor()
+         interceptor.level = (HttpLoggingInterceptor.Level.BODY)
+         val client: OkHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()*/
+
         return Retrofit.Builder().baseUrl(Constants.BASE_URL)
+            // .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(WeatherAPI::class.java)
