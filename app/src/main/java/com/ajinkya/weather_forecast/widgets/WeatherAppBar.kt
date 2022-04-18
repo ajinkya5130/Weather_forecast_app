@@ -12,19 +12,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 
-//@Preview
+@Preview
 @Composable
 fun WeatherAppBar(
     title: String = "Title",
     icon: ImageVector? = null,
     isMainScreen: Boolean = true,
     elevation: Dp = 5.dp,
-    navController: NavController,
+    //navController: NavController,
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {}
 ) {
@@ -34,7 +35,11 @@ fun WeatherAppBar(
             Text(
                 text = title,
                 color = Color.Black,
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
             )
         }, actions = {
             if (isMainScreen) {
