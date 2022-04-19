@@ -1,28 +1,32 @@
 package com.ajinkya.weather_forecast.widgets
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.ajinkya.weather_forecast.model.FavoriteModel
 import com.ajinkya.weather_forecast.navigation.WeatherScreens
+import com.ajinkya.weather_forecast.screens.favorite.FavoriteViewModel
 
 //@Preview
 @Composable
@@ -32,12 +36,18 @@ fun WeatherAppBar(
     isMainScreen: Boolean = true,
     elevation: Dp = 5.dp,
     navController: NavController,
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {}
 ) {
     val showDialog = remember {
         mutableStateOf(false)
     }
+
+    val showIt = remember {
+        mutableStateOf(false)
+    }
+    val context: Context = LocalContext.current
 
     if (showDialog.value) {
         ShowSettingDropDownMenu(showDialog, navController)
@@ -56,6 +66,7 @@ fun WeatherAppBar(
             )
         }, actions = {
             if (isMainScreen) {
+
                 IconButton(onClick = { onAddActionClicked.invoke() }) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -86,11 +97,67 @@ fun WeatherAppBar(
                     )
                 }
             }
+            if (isMainScreen) {
+                val isAlreadyPresentInDB =
+                    favoriteViewModel.favList.collectAsState().value.filter { item ->
+                        (item.city == title.split(",")[0])
+                    }
+                if (isAlreadyPresentInDB.isNullOrEmpty()) {
+                    IconButton(onClick = {
+                        val split = title.split(",")
+                        favoriteViewModel.insertFav(
+                            FavoriteModel(
+                                city = split[0], country = split[1]
+                            )
+                        ).run {
+                            showIt.value = true
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "Fav Button",
+                            tint = Color.Red.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .scale(0.9f)
+                        )
+                    }
+                } else {
+
+
+                    IconButton(onClick = {
+                        val split = title.split(",")
+                        favoriteViewModel.insertFav(
+                            FavoriteModel(
+                                city = split[0], country = split[1]
+                            )
+                        ).run {
+                            showIt.value = false
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite, contentDescription = "Fav Button",
+                            tint = Color.Red.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .scale(0.9f)
+                        )
+                    }
+                }
+                ShowToast(context, showIt)
+            }
         }
     )/* {
 
         
     }*/
+}
+
+@Composable
+fun ShowToast(context: Context, showIt: MutableState<Boolean>) {
+
+    if (showIt.value) {
+        Toast.makeText(context, "Added to Favorite", Toast.LENGTH_SHORT).show()
+    }
+
 }
 
 @Composable
