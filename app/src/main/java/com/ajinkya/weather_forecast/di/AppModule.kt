@@ -1,10 +1,15 @@
 package com.ajinkya.weather_forecast.di
 
+import android.content.Context
+import androidx.room.Room
+import com.ajinkya.weather_forecast.data.WeatherDao
+import com.ajinkya.weather_forecast.data.WeatherDatabase
 import com.ajinkya.weather_forecast.network.WeatherAPI
 import com.ajinkya.weather_forecast.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -28,5 +33,18 @@ class AppModule {
             .build()
             .create(WeatherAPI::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideWeatherDao(weatherDatabase: WeatherDatabase): WeatherDao {
+        return weatherDatabase.weatherDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideDatabase(@ApplicationContext context: Context): WeatherDatabase =
+        Room.databaseBuilder(context, WeatherDatabase::class.java, "weather_db")
+            .fallbackToDestructiveMigration()
+            .build()
 
 }
