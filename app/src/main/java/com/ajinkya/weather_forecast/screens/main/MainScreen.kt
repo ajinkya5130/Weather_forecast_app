@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ajinkya.weather_forecast.data.DataOrException
 import com.ajinkya.weather_forecast.model.WeatherModel
+import com.ajinkya.weather_forecast.navigation.WeatherScreens
 import com.ajinkya.weather_forecast.screens.main.MainViewModel
 import com.ajinkya.weather_forecast.util.Constants
 import com.ajinkya.weather_forecast.util.formatDate
@@ -28,12 +29,17 @@ import com.ajinkya.weather_forecast.widgets.*
 private const val TAG = "MainScreen"
 
 @Composable
-fun MainScreen(navController: NavController, mainViewModel: MainViewModel = hiltViewModel()) {
+fun MainScreen(
+    navController: NavController,
+    mainViewModel: MainViewModel = hiltViewModel(),
+    cityName: String? = ""
+) {
+    Log.e(TAG, "MainScreen: cityName: $cityName")
 
     val weatherData = produceState<DataOrException<WeatherModel, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
     ) {
-        value = mainViewModel.getWeatherData("Delhi")
+        value = mainViewModel.getWeatherData(city = cityName ?: "")
     }.value
 
     if (weatherData.loading == true) {
@@ -51,8 +57,12 @@ fun MainScaffold(weatherModel: WeatherModel, navController: NavController) {
         topBar = {
             WeatherAppBar(
                 title = weatherModel.city.name + ", " + weatherModel.city.country,
-                //navController = navController
-                /* , icon = Icons.Default.ArrowBack*/
+                navController = navController,
+                onAddActionClicked = {
+                    navController.navigate(WeatherScreens.SearchScreen.name)
+
+                }
+
             ) {
                 Log.d(TAG, "MainScaffold: back Button Clicked")
             }
