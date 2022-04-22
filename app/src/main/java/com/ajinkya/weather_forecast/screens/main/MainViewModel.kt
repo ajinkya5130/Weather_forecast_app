@@ -12,7 +12,10 @@ private const val TAG = "MainViewModel"
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository: WeatherRepository) : ViewModel() {
 
-    suspend fun getWeatherData(city: String): DataOrException<WeatherModel, Boolean, Exception> {
-        return repository.getWeatherData(cityName = city)
+    suspend fun getWeatherData(
+        city: String,
+        unit: String
+    ): DataOrException<WeatherModel, Boolean, Exception> {
+        return repository.getWeatherData(cityName = city, unit)
     }
 }

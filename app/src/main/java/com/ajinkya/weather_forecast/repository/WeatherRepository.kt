@@ -9,9 +9,12 @@ import javax.inject.Inject
 
 private const val TAG = "WeatherRepository"
 class WeatherRepository @Inject constructor(private val api: WeatherAPI) {
-    suspend fun getWeatherData(cityName: String): DataOrException<WeatherModel, Boolean, Exception> {
+    suspend fun getWeatherData(
+        cityName: String,
+        unit: String
+    ): DataOrException<WeatherModel, Boolean, Exception> {
         val res = try {
-            api.getWeatherJsonData(cityName)
+            api.getWeatherJsonData(cityName, units = unit)
         } catch (e: Exception) {
             e.printStackTrace()
             Log.e(TAG, "getWeatherData: ${e.message}")

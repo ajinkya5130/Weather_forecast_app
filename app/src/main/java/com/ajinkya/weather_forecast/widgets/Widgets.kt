@@ -98,7 +98,7 @@ fun WeatherStateImage(imageUrl: String) {
 }
 
 @Composable
-fun HumidityWindPressureRow(weatherModel: WeatherItem) {
+fun HumidityWindPressureRow(weatherModel: WeatherItem, isImperial: Boolean) {
     Row(
         modifier = Modifier
             .padding(12.dp)
@@ -139,7 +139,10 @@ fun HumidityWindPressureRow(weatherModel: WeatherItem) {
             )
 
             Spacer(modifier = Modifier.size(5.dp))
-            Text(text = "${weatherModel.speed} m/h", style = MaterialTheme.typography.caption)
+            Text(
+                text = "${weatherModel.speed} " + if (isImperial) "m/h" else "m/s",
+                style = MaterialTheme.typography.caption
+            )
 
         }
 

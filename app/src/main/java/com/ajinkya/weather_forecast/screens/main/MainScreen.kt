@@ -6,8 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,10 +20,12 @@ import com.ajinkya.weather_forecast.data.DataOrException
 import com.ajinkya.weather_forecast.model.WeatherModel
 import com.ajinkya.weather_forecast.navigation.WeatherScreens
 import com.ajinkya.weather_forecast.screens.main.MainViewModel
+import com.ajinkya.weather_forecast.screens.settings.SettingViewModel
 import com.ajinkya.weather_forecast.util.Constants
 import com.ajinkya.weather_forecast.util.formatDate
 import com.ajinkya.weather_forecast.util.formatDecimals
 import com.ajinkya.weather_forecast.widgets.*
+import java.util.*
 
 private const val TAG = "MainScreen"
 
@@ -32,26 +33,43 @@ private const val TAG = "MainScreen"
 fun MainScreen(
     navController: NavController,
     mainViewModel: MainViewModel = hiltViewModel(),
+    settingViewModel: SettingViewModel = hiltViewModel(),
     cityName: String? = ""
 ) {
+    val curCity = if (cityName!!.isBlank()) "Solapur" else cityName
     Log.e(TAG, "MainScreen: cityName: $cityName")
+    val unitFromDb = settingViewModel.unitList.collectAsState().value
+    var unit by remember {
+        mutableStateOf("imperial")
+    }
 
-    val weatherData = produceState<DataOrException<WeatherModel, Boolean, Exception>>(
-        initialValue = DataOrException(loading = true)
-    ) {
-        value = mainViewModel.getWeatherData(city = cityName ?: "")
-    }.value
+    var isImperial by remember {
+        mutableStateOf(false)
 
-    if (weatherData.loading == true) {
-        Log.e(TAG, "ShowData: InLoading")
-        CircularProgressIndicator()
-    } else if (weatherData.data != null) {
-        MainScaffold(weatherData.data!!, navController)
+    }
+
+    if (!unitFromDb.isNullOrEmpty()) {
+        unit = unitFromDb[0].unit.split("(")[0].toLowerCase(Locale.ENGLISH)
+        isImperial = unit == "imperial"
+
+        val weatherData = produceState<DataOrException<WeatherModel, Boolean, Exception>>(
+            initialValue = DataOrException(loading = true)
+        ) {
+            value = mainViewModel.getWeatherData(city = curCity, unit)
+        }.value
+
+        if (weatherData.loading == true) {
+            Log.e(TAG, "ShowData: InLoading")
+            CircularProgressIndicator()
+        } else if (weatherData.data != null) {
+            MainScaffold(weatherData.data!!, navController, isImperial)
+        }
+
     }
 }
 
 @Composable
-fun MainScaffold(weatherModel: WeatherModel, navController: NavController) {
+fun MainScaffold(weatherModel: WeatherModel, navController: NavController, isImperial: Boolean) {
 
     Scaffold(
         topBar = {
@@ -67,14 +85,14 @@ fun MainScaffold(weatherModel: WeatherModel, navController: NavController) {
                 Log.d(TAG, "MainScaffold: back Button Clicked")
             }
         }) {
-        MainContent(weatherModel)
+        MainContent(weatherModel, isImperial)
 
     }
 
 }
 
 @Composable
-fun MainContent(weatherModel: WeatherModel) {
+fun MainContent(weatherModel: WeatherModel, isImperial: Boolean) {
     val weatherItem = weatherModel.list[0]
     val imageUrl = Constants.IMAGE_BASE_URL + weatherItem.weather[0].icon + ".png"
     val weatherType = weatherItem.weather[0].main
@@ -119,7 +137,7 @@ fun MainContent(weatherModel: WeatherModel) {
             }
 
         }
-        HumidityWindPressureRow(weatherItem)
+        HumidityWindPressureRow(weatherItem, isImperial)
         Divider()
         SunsetAndSunriseRow(weatherItem)
         Text(

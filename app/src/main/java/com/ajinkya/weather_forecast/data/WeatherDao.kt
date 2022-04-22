@@ -2,6 +2,7 @@ package com.ajinkya.weather_forecast.data
 
 import androidx.room.*
 import com.ajinkya.weather_forecast.model.FavoriteModel
+import com.ajinkya.weather_forecast.model.Unit
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,5 +25,23 @@ interface WeatherDao {
 
     @Delete
     suspend fun deleteFav(favoriteModel: FavoriteModel)
+
+    @Query("SELECT * FROM settings_table")
+    fun getUnits(): Flow<List<Unit>>
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUnit(unitModel: Unit)
+
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateUnit(unitModel: Unit)
+
+    @Query("Delete from settings_table")
+    suspend fun deleteAllUnits()
+
+    @Delete
+    suspend fun deleteUnit(unitModel: Unit)
+
 
 }
